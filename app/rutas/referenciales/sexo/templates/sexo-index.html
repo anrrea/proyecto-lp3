@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-    
+
 {% block titulo %}
-Ciudades
+Sexo
 {% endblock %}
 
 {% block contenido %}
 <div class="container mt-4">
-    <h3>Listar Ciudades</h3>
+    <h3>Listar Sexo</h3>
 
     <!-- tarjeta -->
     <div class="card">
@@ -22,7 +22,7 @@ Ciudades
             </tr>
           </thead>
           <tbody></tbody>
-      </table>
+        </table>
       </div>
     </div>
     <!-- /tarjeta -->
@@ -42,9 +42,9 @@ Ciudades
           <!-- Modal body -->
           <div class="modal-body">
             <div class="form-group">
-              <input type="hidden" id="txtCiudadId">
+              <input type="hidden" id="txtIdSexo">
               <label for="txtDescripcion">Descripción:</label>
-              <input type="text" class="form-control" placeholder="Ingrese alguna ciudad" id="txtDescripcion">
+              <input type="text" class="form-control" placeholder="Ingrese un sexo" id="txtDescripcion">
             </div>
           </div>
 
@@ -71,18 +71,17 @@ Ciudades
 
 {% block js %}
 <script>
-
   const initDatatable = () => {
     $('#tbl').DataTable({
       language: {
         url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
       },
-      ajax:'/api/v1/ciudades',
+      ajax: '/api/v1/sexos',
       columns: [
         { data: 'descripcion' },
         { data: function(row) {
-            return `<button type="button" name="btn_editar" class="btn btn-primary" data-ciudad_id="${row.ciudad_id}">Editar</button>
-                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-ciudad_id="${row.ciudad_id}">Eliminar</button>`  // Usamos data-ciudad_id
+            return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
+                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`
           }
         }
       ]
@@ -90,11 +89,11 @@ Ciudades
   }
 
   const agregar = () => {
-    $('#btnAgregar').on('click', function(){
+    $('#btnAgregar').on('click', function() {
       // Setear un título a modal
-      $('#modalTitle').text("Agregar una Ciudad");
+      $('#modalTitle').text("Agregar Sexo");
       // inicia ventana modal
-      $('#txtCiudadId').val("");
+      $('#txtIdSexo').val("");
       $('#txtDescripcion').val("");
       $('#modalFormulario').modal();
     });
@@ -102,49 +101,51 @@ Ciudades
 
   const guardar = () => {
     $('#btnGuardar').on('click', function() {
-      const ciudadId = $('#txtCiudadId').val();
+      const idSexo = $('#txtIdSexo').val();
       const nuevaDescripcion = $('#txtDescripcion').val();
       const tabla = $('#tbl').DataTable();
 
-      if(ciudadId) {
+      if (idSexo) {
         // update
-        fetch(`/api/v1/ciudades/${ciudadId}`, {
+        fetch(`/api/v1/sexos/${idSexo}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify({ descripcion: nuevaDescripcion})
+          },
+          body: JSON.stringify({ descripcion: nuevaDescripcion })
         })
         .then(resp => resp.json())
         .then(data => {
-          if(data && !data.error && data.success) {
+          if (data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Actualizado", "La ciudad ha sido actualizada correctamente.", "success");
+            Swal.fire("Actualizado", "El sexo ha sido actualizado correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al actualizar la ciudad.", "error");
+          Swal.fire("Error", "Ocurrió un error al actualizar el sexo.", "error");
         });
       } else {
         // insert
-        fetch(`/api/v1/ciudades`, {
+        fetch(`/api/v1/sexos`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify({ descripcion: nuevaDescripcion})
+          },
+          body: JSON.stringify({ descripcion: nuevaDescripcion })
         })
         .then(resp => resp.json())
         .then(data => {
-          if(data && !data.error && data.success) {
+          if (data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Agregado", "La ciudad ha sido agregada correctamente.", "success");
+            Swal.fire("Agregado", "El sexo ha sido agregado correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al guardar la ciudad.", "error");
+          Swal.fire("Error", "Ocurrió un error al guardar el sexo.", "error");
         });
       }
       $('#txtDescripcion').val("");
@@ -153,7 +154,7 @@ Ciudades
   }
 
   const editar = () => {
-    $('#tbl').on('click', 'button[name="btn_editar"]',function(){
+    $('#tbl').on('click', 'button[name="btn_editar"]', function() {
       // Mostrar mensaje de confirmación usando sweetalert
       Swal.fire({
         title: "¿Deseas editar este registro?",
@@ -162,13 +163,13 @@ Ciudades
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          $('#modalTitle').text("Editar una Ciudad");
+          $('#modalTitle').text("Editar Sexo");
 
-          const ciudadId = $(this).data('ciudad_id');  // Usamos ciudad_id
-          $('#txtCiudadId').val(ciudadId);
+          const idSexo = $(this).data('id');
+          $('#txtIdSexo').val(idSexo);
 
-          // Obtener la descripción del backend
-          fetch(`/api/v1/ciudades/${ciudadId}`, {
+          // Necesitamos obtener la descripción del backend
+          fetch(`/api/v1/sexos/${idSexo}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json'
@@ -186,8 +187,7 @@ Ciudades
 
   const eliminar = () => {
     $('#tbl').on('click', 'button[name="btn_eliminar"]', function() {
-      const ciudadId = $(this).data('ciudad_id');  // Usamos ciudad_id
-      const fila = $(this).closest('tr');  // Obtener fila antes del fetch
+      const idSexo = $(this).data('id');
       // Mostrar mensaje de confirmación usando sweetalert
       Swal.fire({
         title: "¿Deseas eliminar este registro?",
@@ -196,7 +196,7 @@ Ciudades
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          fetch(`/api/v1/ciudades/${ciudadId}`, {
+          fetch(`/api/v1/sexos/${idSexo}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json'
@@ -205,15 +205,15 @@ Ciudades
           .then(resp => resp.json())
           .then(data => {
             if (data && !data.error && data.success) {
-              // Para borrar la fila del datatable (cliente)
+              const fila = $(this).closest('tr');
               const tabla = $('#tbl').DataTable();
-              tabla.row(fila).remove().draw();  // Corregir eliminación de la fila
-              Swal.fire("Eliminado", "", "success");
+              tabla.row(fila).remove().draw();
+              Swal.fire("Eliminado", "", data.success);
             } else {
               Swal.fire(data.error);
             }
           }).catch(err => {
-            Swal.fire("Error", "Ocurrió un error al eliminar la ciudad.", "error");
+            Swal.fire("Error", "Ocurrió un error al eliminar el sexo.", "error");
           });
         }
       });
@@ -227,7 +227,7 @@ Ciudades
     eliminar();
   }
 
-  $(function() {
+  $(document).ready(function() {
     initDatatable();
     addEvents();
   });

@@ -1,60 +1,60 @@
 from flask import Blueprint, request, jsonify, current_app as app
-from app.dao.referenciales.marca.MarcaDao import MarcaDao
+from app.dao.referenciales.tipo_producto.Tipo_ProductoDao import Tipo_ProductoDao
 
-marcaapi = Blueprint('marcaapi', __name__)
+tipo_producto_api = Blueprint('tipo_producto_api', __name__)
 
-# Trae todas las marcas
-@marcaapi.route('/marcas', methods=['GET'])
-def getMarcas():
-    marcao = MarcaDao()
+# Trae todos los tipos de producto
+@tipo_producto_api.route('/tipo_productos', methods=['GET'])
+def getTipoProductos():
+    tipo_producto_dao = Tipo_ProductoDao()
 
     try:
-        marcas = marcao.getMarcas()
+        tipo_productos = tipo_producto_dao.getTipoProductos()
 
         return jsonify({
             'success': True,
-            'data': marcas,
+            'data': tipo_productos,
             'error': None
         }), 200
 
     except Exception as e:
-        app.logger.error(f"Error al obtener todas las marcas: {str(e)}")
+        app.logger.error(f"Error al obtener todos los tipos de producto: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-@marcaapi.route('/marcas/<int:marca_id>', methods=['GET'])
-def getMarca(marca_id):
-    marcao = MarcaDao()
+@tipo_producto_api.route('/tipo_productos/<int:tipo_producto_id>', methods=['GET'])
+def getTipoProducto(tipo_producto_id):
+    tipo_producto_dao = Tipo_ProductoDao()
 
     try:
-        marca = marcao.getMarcaById(marca_id)
+        tipo_producto = tipo_producto_dao.getTipoProductoById(tipo_producto_id)
 
-        if marca:
+        if tipo_producto:
             return jsonify({
                 'success': True,
-                'data': marca,
+                'data': tipo_producto,
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la marca con el ID proporcionado.'
+                'error': 'No se encontró el tipo de producto con el ID proporcionado.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al obtener marca: {str(e)}")
+        app.logger.error(f"Error al obtener tipo de producto: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Agrega una nueva marca
-@marcaapi.route('/marcas', methods=['POST'])
-def addMarca():
+# Agrega un nuevo tipo de producto
+@tipo_producto_api.route('/tipo_productos', methods=['POST'])
+def addTipoProducto():
     data = request.get_json()
-    marcao = MarcaDao()
+    tipo_producto_dao = Tipo_ProductoDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
     campos_requeridos = ['descripcion']
@@ -69,26 +69,26 @@ def addMarca():
 
     try:
         descripcion = data['descripcion'].upper()
-        marca_id = marcao.guardarMarca(descripcion)
-        if marca_id is not None:
+        tipo_producto_id = tipo_producto_dao.guardarTipoProducto(descripcion)
+        if tipo_producto_id is not None:
             return jsonify({
                 'success': True,
-                'data': {'id': marca_id, 'descripcion': descripcion},
+                'data': {'id': tipo_producto_id, 'descripcion': descripcion},
                 'error': None
             }), 201
         else:
-            return jsonify({'success': False, 'error': 'No se pudo guardar la marca. Consulte con el administrador.'}), 500
+            return jsonify({'success': False, 'error': 'No se pudo guardar el tipo de producto. Consulte con el administrador.'}), 500
     except Exception as e:
-        app.logger.error(f"Error al agregar marca: {str(e)}")
+        app.logger.error(f"Error al agregar tipo de producto: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-@marcaapi.route('/marcas/<int:marca_id>', methods=['PUT'])
-def updateMarca(marca_id):
+@tipo_producto_api.route('/tipo_productos/<int:tipo_producto_id>', methods=['PUT'])
+def updateTipoProducto(tipo_producto_id):
     data = request.get_json()
-    marcao = MarcaDao()
+    tipo_producto_dao = Tipo_ProductoDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
     campos_requeridos = ['descripcion']
@@ -102,45 +102,46 @@ def updateMarca(marca_id):
             }), 400
 
     descripcion = data['descripcion']
+    
     try:
-        if marcao.updateMarca(marca_id, descripcion.upper()):
+        if tipo_producto_dao.updateTipoProducto(tipo_producto_id, descripcion.upper()):
             return jsonify({
                 'success': True,
-                'data': {'id': marca_id, 'descripcion': descripcion},
+                'data': {'id': tipo_producto_id, 'descripcion': descripcion},
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la marca con el ID proporcionado o no se pudo actualizar.'
+                'error': 'No se encontró el tipo de producto con el ID proporcionado o no se pudo actualizar.'
             }), 404
     except Exception as e:
-        app.logger.error(f"Error al actualizar marca: {str(e)}")
+        app.logger.error(f"Error al actualizar tipo de producto: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-@marcaapi.route('/marcas/<int:marca_id>', methods=['DELETE'])
-def deleteMarca(marca_id):
-    marcao = MarcaDao()
+@tipo_producto_api.route('/tipo_productos/<int:tipo_producto_id>', methods=['DELETE'])
+def deleteTipoProducto(tipo_producto_id):
+    tipo_producto_dao = Tipo_ProductoDao()
 
     try:
-        # Usar el retorno de eliminarMarca para determinar el éxito
-        if marcao.deleteMarca(marca_id):
+        # Usar el retorno de eliminarTipoProducto para determinar el éxito
+        if tipo_producto_dao.deleteTipoProducto(tipo_producto_id):
             return jsonify({
                 'success': True,
-                'mensaje': f'Marca con ID {marca_id} eliminada correctamente.',
+                'mensaje': f'Tipo de producto con ID {tipo_producto_id} eliminado correctamente.',
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró la marca con el ID proporcionado o no se pudo eliminar.'
+                'error': 'No se encontró el tipo de producto con el ID proporcionado o no se pudo eliminar.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al eliminar marca: {str(e)}")
+        app.logger.error(f"Error al eliminar tipo de producto: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'

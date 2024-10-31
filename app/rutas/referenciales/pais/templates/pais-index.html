@@ -33,7 +33,7 @@ Paises
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
-          <!-- Modal Header -->
+          <!-- Modal Header encabezado -->
           <div class="modal-header">
             <h4 class="modal-title" id="modalTitle"></h4>
             <button type="button" class="close" data-dismiss="modal">&times;</button>
@@ -68,6 +68,7 @@ Paises
     </div>
 </div>
 {% endblock %}
+
 
 {% block js %}
 <script>
@@ -138,7 +139,7 @@ Paises
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Actualizado", "El pais ha sido agregada correctamente.", "success");
+            Swal.fire("Actualizado", "El pais ha sido agregado correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
@@ -163,7 +164,7 @@ Paises
       }).then((result) => {
         if (result.isConfirmed) {
           //Swal.fire("Saved!", "", "success");
-          $('#modalTitle').text("Editar un Pais");
+          $('#modalTitle').text("Editar una Ciudad");
 
           const idPais = $(this).data('id');
           $('#txtIdPais').val(idPais);

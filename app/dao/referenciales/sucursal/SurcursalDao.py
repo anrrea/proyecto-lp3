@@ -1,29 +1,29 @@
-
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
 
-class CiudadDao:
+class SucursalDao:
 
-    def getCiudades(self):
-
-        ciudadSQL = """
-        SELECT ciudad_id, descripcion
-        FROM ciudades
+    def getSucursales(self):
+        sucursalSQL = """
+        SELECT id_sucursal, nombre, direccion, telefono
+        FROM sucursales
         """
         # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(ciudadSQL)
+            cur.execute(sucursalSQL)
             # trae datos de la bd
-            lista_ciudades = cur.fetchall()
+            lista_sucursales = cur.fetchall()
             # retorno los datos
             lista_ordenada = []
-            for item in lista_ciudades:
+            for item in lista_sucursales:
                 lista_ordenada.append({
-                    "ciudad_id": item[0],
-                    "descripcion": item[1]
+                    "id_sucursal": item[0],
+                    "nombre": item[1],
+                    "direccion": item[2],
+                    "telefono": item[3]  
                 })
             return lista_ordenada
         except con.Error as e:
@@ -32,35 +32,38 @@ class CiudadDao:
             cur.close()
             con.close()
 
-    def getCiudadById(self, ciudad_id):
-
-        ciudadSQL = """
-        SELECT ciudad_id, descripcion
-        FROM ciudades WHERE ciudad_id=%s
+    def getSucursalById(self, id_sucursal):
+        sucursalSQL = """
+        SELECT id_sucursal, nombre, direccion, telefono
+        FROM sucursales WHERE id_sucursal=%s
         """
         # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(ciudadSQL, (ciudad_id,))
+            cur.execute(sucursalSQL, (id_sucursal,))
             # trae datos de la bd
-            ciudadEncontrada = cur.fetchone()
+            sucursalEncontrada = cur.fetchone()
             # retorno los datos
-            return {
-                    "ciudad_id": ciudadEncontrada[0],
-                    "descripcion": ciudadEncontrada[1]
+            if sucursalEncontrada:
+                return {
+                    "id_sucursal": sucursalEncontrada[0],
+                    "nombre": sucursalEncontrada[1],
+                    "direccion": sucursalEncontrada[2],
+                    "telefono": sucursalEncontrada[3]  
                 }
+            return None
         except con.Error as e:
             app.logger.info(e)
         finally:
             cur.close()
             con.close()
 
-    def guardarCiudad(self, descripcion):
-
-        insertCiudadSQL = """
-        INSERT INTO ciudades(descripcion) VALUES(%s)
+    def guardarSucursal(self, nombre, direccion, telefono):
+        insertSucursalSQL = """
+        INSERT INTO sucursales(nombre, direccion, telefono)
+        VALUES (%s, %s, %s)
         """
 
         conexion = Conexion()
@@ -69,59 +72,23 @@ class CiudadDao:
 
         # Ejecucion exitosa
         try:
-            cur.execute(insertCiudadSQL, (descripcion,))
+            cur.execute(insertSucursalSQL, (nombre, direccion, telefono))
             # se confirma la insercion
             con.commit()
-
             return True
-
-        # Si algo fallo entra aqui
         except con.Error as e:
             app.logger.info(e)
-
-        # Siempre se va ejecutar
-        finally:
-            cur.close()
-            con.close()
-
-        return False
-
-    def updateCiudad(self, ciudad_id, descripcion):
-
-        updateCiudadSQL = """
-        UPDATE ciudades
-        SET descripcion=%s
-        WHERE ciudad_id=%s
-        """
-
-        conexion = Conexion()
-        con = conexion.getConexion()
-        cur = con.cursor()
-
-        # Ejecucion exitosa
-        try:
-            cur.execute(updateCiudadSQL, (descripcion, ciudad_id,))
-            # se confirma la insercion
-            con.commit()
-
-            return True
-
-        # Si algo fallo entra aqui
-        except con.Error as e:
-            app.logger.info(e)
-
-        # Siempre se va ejecutar
         finally:
             cur.close()
             con.close()
 
         return False
 
-    def deleteCiudad(self, ciudad_id):
-
-        updateCiudadSQL = """
-        DELETE FROM ciudades
-        WHERE ciudad_id=%s
+    def updateSucursal(self, id_sucursal, nombre, direccion, telefono):
+        updateSucursalSQL = """
+        UPDATE sucursales
+        SET nombre=%s, direccion=%s, telefono=%s
+        WHERE id_sucursal=%s
         """
 
         conexion = Conexion()
@@ -130,17 +97,36 @@ class CiudadDao:
 
         # Ejecucion exitosa
         try:
-            cur.execute(updateCiudadSQL, (ciudad_id,))
+            cur.execute(updateSucursalSQL, (nombre, direccion, telefono, id_sucursal))  
             # se confirma la insercion
             con.commit()
-
             return True
-
-        # Si algo fallo entra aqui
         except con.Error as e:
             app.logger.info(e)
+        finally:
+            cur.close()
+            con.close()
 
-        # Siempre se va ejecutar
+        return False
+
+    def deleteSucursal(self, id_sucursal):
+        deleteSucursalSQL = """
+        DELETE FROM sucursales
+        WHERE id_sucursal=%s
+        """
+
+        conexion = Conexion()
+        con = conexion.getConexion()
+        cur = con.cursor()
+
+        # Ejecucion exitosa
+        try:
+            cur.execute(deleteSucursalSQL, (id_sucursal,))
+            # se confirma la insercion
+            con.commit()
+            return True
+        except con.Error as e:
+            app.logger.info(e)
         finally:
             cur.close()
             con.close()

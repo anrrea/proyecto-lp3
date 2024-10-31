@@ -1,158 +1,101 @@
-from flask import Flask
+from flask import Flask 
 
-app = Flask(__name__)
+app = Flask (__name__)
 
-# importar referenciales
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
+
+
 from app.rutas.referenciales.ciudad.ciudad_routes import ciumod
-from app.rutas.referenciales.marca.marca_routes import marmod
-from app.rutas.referenciales.pais.pais_routes import paimod
+from app.rutas.referenciales.pais.pais_routes import paismod
+from app.rutas.referenciales.nacionalidad.nacionalidad_routes import nacmod
+from app.rutas.referenciales.producto.producto_routes import promod
+from app.rutas.referenciales.persona.persona_routes import permod
+from app.rutas.referenciales.proveedor.proveedor_routes import provmod
 from app.rutas.referenciales.cliente.cliente_routes import climod
-from app.rutas.referenciales.empleado.empleado_routes import empmod
 from app.rutas.referenciales.sucursal.sucursal_routes import sucmod
-from app.rutas.referenciales.impuesto.impuesto_routes import impmod
-from app.rutas.referenciales.caja.caja_routes import cajmod
-from app.rutas.referenciales.categoria.categoria_routes import catmod
-from app.rutas.referenciales.deposito.deposito_routes import depmod
-from app.rutas.referenciales.descuento.descuento_routes import desmod
-from app.rutas.referenciales.usuario.usuario_routes import usumod
-from app.rutas.referenciales.pedido.pedido_routes import pedmod
-from app.rutas.referenciales.venta.venta_routes import venmod
-from app.rutas.referenciales.devolucion.devolucion_routes import devmod
-
-
-# registrar referenciales
+from app.rutas.referenciales.deposito.deposito_routes import depomod
+from app.rutas.referenciales.estado_civil.estado_civil_routes import estmod
+from app.rutas.referenciales.sexo.sexo_routes import sexomod
+from app.rutas.referenciales.marca.marca_routes import marcmod
+from app.rutas.referenciales.tipo_producto.tipo_producto_routes import tipprodmod
+ 
 modulo0 = '/referenciales'
 app.register_blueprint(ciumod, url_prefix=f'{modulo0}/ciudad')
 
+app.register_blueprint(paismod, url_prefix=f'{modulo0}/pais')
+
+app.register_blueprint(nacmod, url_prefix=f'{modulo0}/nacionalidad')
+
+app.register_blueprint(promod, url_prefix=f'{modulo0}/producto')
+
+app.register_blueprint(permod, url_prefix=f'{modulo0}/persona')
+
+app.register_blueprint(provmod, url_prefix=f'{modulo0}/proveedor')
+
+app.register_blueprint(climod, url_prefix=f'{modulo0}/cliente')
+
+app.register_blueprint(sucmod, url_prefix=f'{modulo0}/sucursal')
+
+app.register_blueprint(depomod, url_prefix=f'{modulo0}/deposito')
+
+app.register_blueprint(estmod, url_prefix=f'{modulo0}/estado_civil')
+
+app.register_blueprint(sexomod, url_prefix=f'{modulo0}/sexo')
+
+app.register_blueprint(marcmod, url_prefix=f'{modulo0}/marca')
+
+app.register_blueprint(tipprodmod, url_prefix=f'{modulo0}/tipo_producto')
+
+
 from app.rutas.referenciales.ciudad.ciudad_api import ciuapi
-
-
-modulo0 = '/referenciales'
-app.register_blueprint(marmod, url_prefix=f'{modulo0}/marca')
-
-from app.rutas.referenciales.marca.marca_api import marapi
-
-
-modulo0 = '/referenciales'
-app.register_blueprint(paimod, url_prefix=f'{modulo0}/pais')
 
 from app.rutas.referenciales.pais.pais_api import paiapi
 
+from app.rutas.referenciales.nacionalidad.nacionalidad_api import nacapi
 
-modulo0 = '/referenciales'
-app.register_blueprint(climod, url_prefix=f'{modulo0}/cliente')
+from app.rutas.referenciales.producto.producto_api import proapi
+
+from app.rutas.referenciales.persona.persona_api import perapi
+
+from app.rutas.referenciales.proveedor.proveedor_api import provapi
 
 from app.rutas.referenciales.cliente.cliente_api import cliapi
 
-
-modulo0 = '/referenciales'
-app.register_blueprint(empmod, url_prefix=f'{modulo0}/empleado')
-
-from app.rutas.referenciales.empleado.empleado_api import empapi
-
-
-modulo0 = '/referenciales'
-app.register_blueprint(sucmod, url_prefix=f'{modulo0}/sucursal')
-
 from app.rutas.referenciales.sucursal.sucursal_api import sucapi
 
+from app.rutas.referenciales.deposito.deposito_api import depoapi
 
-modulo0 = '/referenciales'
-app.register_blueprint(impmod, url_prefix=f'{modulo0}/impuesto')
+from app.rutas.referenciales.estado_civil.estado_civil_api import estadocivilapi
 
-from app.rutas.referenciales.impuesto.impuesto_api import impapi
+from app.rutas.referenciales.sexo.sexo_api import sexoapi
 
+from app.rutas.referenciales.marca.marca_api import marcaapi
 
-modulo0 = '/referenciales'
-app.register_blueprint(cajmod, url_prefix=f'{modulo0}/caja')
+from app.rutas.referenciales.tipo_producto.tipo_producto_api import tipo_producto_api
 
-from app.rutas.referenciales.caja.caja_api import cajapi
-
-
-modulo0 = '/referenciales'
-app.register_blueprint(catmod, url_prefix=f'{modulo0}/categoria')
-
-from app.rutas.referenciales.categoria.categoria_api import catapi
-
-
-modulo0 = '/referenciales'
-app.register_blueprint(depmod, url_prefix=f'{modulo0}/deposito')
-
-from app.rutas.referenciales.deposito.deposito_api import depapi
-
-
-modulo0 = '/referenciales'
-app.register_blueprint(desmod, url_prefix=f'{modulo0}/descuento')
-
-from app.rutas.referenciales.descuento.descuento_api import desapi
-
-
-modulo0 = '/referenciales'
-app.register_blueprint(usumod, url_prefix=f'{modulo0}/usuario')
-
-from app.rutas.referenciales.usuario.usuario_api import usuapi
-
-
-modulo0 = '/referenciales'
-app.register_blueprint(pedmod, url_prefix=f'{modulo0}/pedido')
-
-from app.rutas.referenciales.pedido.pedido_api import pedapi
-
-
-modulo0 = '/referenciales'
-app.register_blueprint(venmod, url_prefix=f'{modulo0}/venta')
-
-from app.rutas.referenciales.venta.venta_api import venapi
-
-
-modulo0 = '/referenciales'
-app.register_blueprint(devmod, url_prefix=f'{modulo0}/devolucion')
-
-from app.rutas.referenciales.devolucion.devolucion_api import devapi
-
-
-# APIS v1
 version1 = '/api/v1'
 app.register_blueprint(ciuapi, url_prefix=version1)
 
-version1 = '/api/v1'
-app.register_blueprint(marapi, url_prefix=version1)
-
-version1 = '/api/v1'
 app.register_blueprint(paiapi, url_prefix=version1)
 
-version1 = '/api/v1'
+app.register_blueprint(nacapi, url_prefix=version1)
+
+app.register_blueprint(proapi, url_prefix=version1)
+
+app.register_blueprint(perapi, url_prefix=version1)
+
+app.register_blueprint(provapi, url_prefix=version1)
+
 app.register_blueprint(cliapi, url_prefix=version1)
 
-version1 = '/api/v1'
-app.register_blueprint(empapi, url_prefix=version1)
-
-version1 = '/api/v1'
 app.register_blueprint(sucapi, url_prefix=version1)
 
-version1 = '/api/v1'
-app.register_blueprint(impapi, url_prefix=version1)
+app.register_blueprint(depoapi, url_prefix=version1)
 
-version1 = '/api/v1'
-app.register_blueprint(cajapi, url_prefix=version1)
+app.register_blueprint(estadocivilapi, url_prefix=version1)
 
-version1 = '/api/v1'
-app.register_blueprint(catapi, url_prefix=version1)
+app.register_blueprint(sexoapi, url_prefix=version1)
 
-version1 = '/api/v1'
-app.register_blueprint(depapi, url_prefix=version1)
+app.register_blueprint(marcaapi, url_prefix=version1)
 
-version1 = '/api/v1'
-app.register_blueprint(desapi, url_prefix=version1)
-
-version1 = '/api/v1'
-app.register_blueprint(usuapi, url_prefix=version1)
-
-version1 = '/api/v1'
-app.register_blueprint(pedapi, url_prefix=version1)
-
-version1 = '/api/v1'
-app.register_blueprint(venapi, url_prefix=version1)
-
-version1 = '/api/v1'
-app.register_blueprint(devapi, url_prefix=version1)
+app.register_blueprint(tipo_producto_api, url_prefix=version1)

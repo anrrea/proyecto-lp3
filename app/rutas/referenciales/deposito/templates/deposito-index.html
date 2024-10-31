@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
-    
+
 {% block titulo %}
-Depositos
+Depósitos
 {% endblock %}
 
 {% block contenido %}
 <div class="container mt-4">
-    <h3>Listar Depositos</h3>
+    <h3>Listar Depósitos</h3>
 
     <!-- tarjeta -->
     <div class="card">
@@ -17,19 +17,22 @@ Depositos
         <table class="table table-striped" id="tbl">
           <thead>
             <tr>
-              <th>Descripción</th>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Dirección</th>
+              <th>Teléfono</th>
+              <th>Capacidad</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody></tbody>
-      </table>
+        </table>
       </div>
     </div>
     <!-- /tarjeta -->
 
     <!-- El formulario -->
     <div class="modal" id="modalFormulario">
-      <!-- La clase modal-dialog-centered centra el modal -->
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
@@ -43,8 +46,20 @@ Depositos
           <div class="modal-body">
             <div class="form-group">
               <input type="hidden" id="txtIdDeposito">
-              <label for="txtDescripcion">Descripción:</label>
-              <input type="text" class="form-control" placeholder="Ingrese alguna deposito" id="txtDescripcion">
+              <label for="txtNombre">Nombre:</label>
+              <input type="text" class="form-control" placeholder="Ingrese el nombre del Depósito" id="txtNombre">
+            </div>
+            <div class="form-group">
+              <label for="txtDireccion">Dirección:</label>
+              <input type="text" class="form-control" placeholder="Ingrese la dirección" id="txtDireccion">
+            </div>
+            <div class="form-group">
+              <label for="txtTelefono">Teléfono:</label>
+              <input type="number" class="form-control" placeholder="Ingrese el número de teléfono" id="txtTelefono">
+            </div>
+            <div class="form-group">
+              <label for="txtCapacidad">Capacidad: En m3</label>
+              <input type="number" class="form-control" placeholder="Ingrese la capacidad" id="txtCapacidad">
             </div>
           </div>
 
@@ -71,18 +86,21 @@ Depositos
 
 {% block js %}
 <script>
-
   const initDatatable = () => {
     $('#tbl').DataTable({
       language: {
         url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
       },
-      ajax:'/api/v1/depositos',
+      ajax: '/api/v1/depositos',
       columns: [
-        { data: 'descripcion' },
+        { data: 'id_deposito' },
+        { data: 'nombre' },
+        { data: 'direccion' },
+        { data: 'telefono' },
+        { data: 'capacidad' },
         { data: function(row) {
-            return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
-                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`
+            return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id_deposito}">Editar</button>
+                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id_deposito}">Eliminar</button>`;
           }
         }
       ]
@@ -91,11 +109,12 @@ Depositos
 
   const agregar = () => {
     $('#btnAgregar').on('click', function(){
-      // Setear un título a modal
-      $('#modalTitle').text("Agregar un deposito");
-      // inicia ventana modal
+      $('#modalTitle').text("Agregar un Depósito");
       $('#txtIdDeposito').val("");
-      $('#txtDescripcion').val("");
+      $('#txtNombre').val("");
+      $('#txtDireccion').val("");
+      $('#txtTelefono').val("");
+      $('#txtCapacidad').val("");
       $('#modalFormulario').modal();
     });
   }
@@ -103,58 +122,64 @@ Depositos
   const guardar = () => {
     $('#btnGuardar').on('click', function() {
       const idDeposito = $('#txtIdDeposito').val();
-      const nuevaDescripcion = $('#txtDescripcion').val();
+      const nuevoNombre = $('#txtNombre').val();
+      const nuevaDireccion = $('#txtDireccion').val();
+      const nuevoTelefono = $('#txtTelefono').val();
+      const nuevaCapacidad = $('#txtCapacidad').val();
       const tabla = $('#tbl').DataTable();
 
+      const depositoData = {
+        nombre: nuevoNombre,
+        direccion: nuevaDireccion,
+        telefono: nuevoTelefono,
+        capacidad: nuevaCapacidad
+      };
+
       if(idDeposito) {
-        // update
         fetch(`/api/v1/depositos/${idDeposito}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify({ descripcion: nuevaDescripcion})
+          }, body: JSON.stringify(depositoData)
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Actualizado", "El deposito ha sido actualizado correctamente.", "success");
+            Swal.fire("Actualizado", "El depósito ha sido actualizado correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al actualizar el deposito.", "error");
+          Swal.fire("Error", "Ocurrió un error al actualizar el depósito.", "error");
         });
       } else {
-        // insert
         fetch(`/api/v1/depositos`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify({ descripcion: nuevaDescripcion})
+          }, body: JSON.stringify(depositoData)
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Actualizado", "El deposito ha sido agregada correctamente.", "success");
+            Swal.fire("Guardado", "El depósito ha sido agregado correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al guardar el deposito.", "error");
+          Swal.fire("Error", "Ocurrió un error al guardar el depósito.", "error");
         });
       }
-      $('#txtDescripcion').val("");
       $('#modalFormulario').modal("hide");
     });
   }
 
   const editar = () => {
-    $('#tbl').on('click', 'button[name="btn_editar"]',function(){
-      // Mostrar mensaje de confirmación usando sweetalert
+    $('#tbl').on('click', 'button[name="btn_editar"]', function(){
       Swal.fire({
         title: "¿Deseas editar este registro?",
         showCancelButton: true,
@@ -162,13 +187,11 @@ Depositos
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          //Swal.fire("Saved!", "", "success");
-          $('#modalTitle').text("Editar una Deposito");
+          $('#modalTitle').text("Editar un Depósito");
 
           const idDeposito = $(this).data('id');
           $('#txtIdDeposito').val(idDeposito);
 
-          // Necesitamos obtener la descripción del backend
           fetch(`/api/v1/depositos/${idDeposito}`, {
             method: 'GET',
             headers: {
@@ -177,7 +200,10 @@ Depositos
           })
           .then(resp => resp.json())
           .then(data => {
-            $('#txtDescripcion').val(data.data.descripcion);
+            $('#txtNombre').val(data.data.nombre);
+            $('#txtDireccion').val(data.data.direccion);
+            $('#txtTelefono').val(data.data.telefono);
+            $('#txtCapacidad').val(data.data.capacidad);
             $('#modalFormulario').modal();
           });
         }
@@ -186,9 +212,8 @@ Depositos
   }
 
   const eliminar = () => {
-    $('#tbl').on('click', 'button[name="btn_eliminar"]',function(){
+    $('#tbl').on('click', 'button[name="btn_eliminar"]', function(){
       const idDeposito = $(this).data('id');
-      // Mostrar mensaje de confirmación usando sweetalert
       Swal.fire({
         title: "¿Deseas eliminar este registro?",
         showCancelButton: true,
@@ -205,8 +230,7 @@ Depositos
           .then(resp => resp.json())
           .then(data => {
             if(data && !data.error && data.success) {
-              // Para borrar la fila del datatable(cliente)
-              const fila =$(this).closest('tr');
+              const fila = $(this).closest('tr');
               const tabla = $('#tbl').DataTable();
               tabla.row(fila).remove().draw();
               Swal.fire("Eliminado", "", data.success);
@@ -214,11 +238,10 @@ Depositos
               Swal.fire(data.error);
             }
           }).catch(err => {
-            Swal.fire("Error", "Ocurrió un error al eliminar el deposito.", "error");
+            Swal.fire("Error", "Ocurrió un error al eliminar el depósito.", "error");
           });
         }
       });
-
     });
   }
 
@@ -229,7 +252,7 @@ Depositos
     eliminar();
   }
 
-  $(function() {
+  $(document).ready(function() {
     initDatatable();
     addEvents();
   });

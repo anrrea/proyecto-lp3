@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-    
+
 {% block titulo %}
 Sucursales
 {% endblock %}
@@ -17,19 +17,21 @@ Sucursales
         <table class="table table-striped" id="tbl">
           <thead>
             <tr>
-              <th>Descripción</th>
+              <th>ID</th>
+              <th>Nombre</th>
+              <th>Dirección</th>
+              <th>Teléfono</th>
               <th>Acciones</th>
             </tr>
           </thead>
           <tbody></tbody>
-      </table>
+        </table>
       </div>
     </div>
     <!-- /tarjeta -->
 
     <!-- El formulario -->
     <div class="modal" id="modalFormulario">
-      <!-- La clase modal-dialog-centered centra el modal -->
       <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content">
 
@@ -43,8 +45,16 @@ Sucursales
           <div class="modal-body">
             <div class="form-group">
               <input type="hidden" id="txtIdSucursal">
-              <label for="txtDescripcion">Descripción:</label>
-              <input type="text" class="form-control" placeholder="Ingrese alguna sucursal" id="txtDescripcion">
+              <label for="txtNombre">Nombre:</label>
+              <input type="text" class="form-control" placeholder="Ingrese el nombre de la Sucursal" id="txtNombre">
+            </div>
+            <div class="form-group">
+              <label for="txtDireccion">Dirección:</label>
+              <input type="text" class="form-control" placeholder="Ingrese la dirección" id="txtDireccion">
+            </div>
+            <div class="form-group">
+              <label for="txtTelefono">Teléfono:</label>
+              <input type="number" class="form-control" placeholder="Ingrese el número de teléfono" id="txtTelefono">
             </div>
           </div>
 
@@ -71,18 +81,20 @@ Sucursales
 
 {% block js %}
 <script>
-
   const initDatatable = () => {
     $('#tbl').DataTable({
       language: {
         url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
       },
-      ajax:'/api/v1/sucursales',
+      ajax: '/api/v1/sucursales',
       columns: [
-        { data: 'descripcion' },
+        { data: 'id_sucursal' },
+        { data: 'nombre' },
+        { data: 'direccion' },
+        { data: 'telefono' },
         { data: function(row) {
-            return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
-                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`
+            return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id_sucursal}">Editar</button>
+                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id_sucursal}">Eliminar</button>`;
           }
         }
       ]
@@ -91,11 +103,11 @@ Sucursales
 
   const agregar = () => {
     $('#btnAgregar').on('click', function(){
-      // Setear un título a modal
       $('#modalTitle').text("Agregar una Sucursal");
-      // inicia ventana modal
       $('#txtIdSucursal').val("");
-      $('#txtDescripcion').val("");
+      $('#txtNombre').val("");
+      $('#txtDireccion').val("");
+      $('#txtTelefono').val("");
       $('#modalFormulario').modal();
     });
   }
@@ -103,16 +115,23 @@ Sucursales
   const guardar = () => {
     $('#btnGuardar').on('click', function() {
       const idSucursal = $('#txtIdSucursal').val();
-      const nuevaDescripcion = $('#txtDescripcion').val();
+      const nuevoNombre = $('#txtNombre').val();
+      const nuevaDireccion = $('#txtDireccion').val();
+      const nuevoTelefono = $('#txtTelefono').val();
       const tabla = $('#tbl').DataTable();
 
+      const sucursalData = {
+        nombre: nuevoNombre,
+        direccion: nuevaDireccion,
+        telefono: nuevoTelefono
+      };
+
       if(idSucursal) {
-        // update
         fetch(`/api/v1/sucursales/${idSucursal}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify({ descripcion: nuevaDescripcion})
+          }, body: JSON.stringify(sucursalData)
         })
         .then(resp => resp.json())
         .then(data => {
@@ -127,18 +146,17 @@ Sucursales
           Swal.fire("Error", "Ocurrió un error al actualizar la sucursal.", "error");
         });
       } else {
-        // insert
         fetch(`/api/v1/sucursales`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify({ descripcion: nuevaDescripcion})
+          }, body: JSON.stringify(sucursalData)
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Actualizado", "La sucursal ha sido agregada correctamente.", "success");
+            Swal.fire("Guardado", "La sucursal ha sido agregada correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
@@ -147,14 +165,12 @@ Sucursales
           Swal.fire("Error", "Ocurrió un error al guardar la sucursal.", "error");
         });
       }
-      $('#txtDescripcion').val("");
       $('#modalFormulario').modal("hide");
     });
   }
 
   const editar = () => {
-    $('#tbl').on('click', 'button[name="btn_editar"]',function(){
-      // Mostrar mensaje de confirmación usando sweetalert
+    $('#tbl').on('click', 'button[name="btn_editar"]', function(){
       Swal.fire({
         title: "¿Deseas editar este registro?",
         showCancelButton: true,
@@ -162,13 +178,11 @@ Sucursales
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          //Swal.fire("Saved!", "", "success");
           $('#modalTitle').text("Editar una Sucursal");
 
           const idSucursal = $(this).data('id');
           $('#txtIdSucursal').val(idSucursal);
 
-          // Necesitamos obtener la descripción del backend
           fetch(`/api/v1/sucursales/${idSucursal}`, {
             method: 'GET',
             headers: {
@@ -177,7 +191,9 @@ Sucursales
           })
           .then(resp => resp.json())
           .then(data => {
-            $('#txtDescripcion').val(data.data.descripcion);
+            $('#txtNombre').val(data.data.nombre);
+            $('#txtDireccion').val(data.data.direccion);
+            $('#txtTelefono').val(data.data.telefono);
             $('#modalFormulario').modal();
           });
         }
@@ -186,9 +202,8 @@ Sucursales
   }
 
   const eliminar = () => {
-    $('#tbl').on('click', 'button[name="btn_eliminar"]',function(){
+    $('#tbl').on('click', 'button[name="btn_eliminar"]', function(){
       const idSucursal = $(this).data('id');
-      // Mostrar mensaje de confirmación usando sweetalert
       Swal.fire({
         title: "¿Deseas eliminar este registro?",
         showCancelButton: true,
@@ -205,8 +220,7 @@ Sucursales
           .then(resp => resp.json())
           .then(data => {
             if(data && !data.error && data.success) {
-              // Para borrar la fila del datatable(cliente)
-              const fila =$(this).closest('tr');
+              const fila = $(this).closest('tr');
               const tabla = $('#tbl').DataTable();
               tabla.row(fila).remove().draw();
               Swal.fire("Eliminado", "", data.success);
@@ -218,7 +232,6 @@ Sucursales
           });
         }
       });
-
     });
   }
 
@@ -229,7 +242,7 @@ Sucursales
     eliminar();
   }
 
-  $(function() {
+  $(document).ready(function() {
     initDatatable();
     addEvents();
   });

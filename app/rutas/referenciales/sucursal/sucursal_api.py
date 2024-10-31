@@ -1,15 +1,14 @@
 from flask import Blueprint, request, jsonify, current_app as app
-from app.dao.referenciales.sucursal.SucursalDao import SucursalDao
+from app.dao.referenciales.sucursal.SurcursalDao import SucursalDao
 
 sucapi = Blueprint('sucapi', __name__)
 
-# Trae todas las sucursales
 @sucapi.route('/sucursales', methods=['GET'])
 def getSucursales():
-    sucdao = SucursalDao()
+    sucursaldao = SucursalDao()
 
     try:
-        sucursales = sucdao.getSucursales()
+        sucursales = sucursaldao.getSucursales()
 
         return jsonify({
             'success': True,
@@ -24,12 +23,12 @@ def getSucursales():
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-@sucapi.route('/sucursales/<int:sucursal_id>', methods=['GET'])
-def getSucursal(sucursal_id):
-    sucdao = SucursalDao()
+@sucapi.route('/sucursales/<int:id_sucursal>', methods=['GET'])
+def getSucursal(id_sucursal):
+    sucursaldao = SucursalDao()
 
     try:
-        sucursal = sucdao.getSucursalById(sucursal_id)
+        sucursal = sucursaldao.getSucursalById(id_sucursal)
 
         if sucursal:
             return jsonify({
@@ -50,34 +49,38 @@ def getSucursal(sucursal_id):
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-# Agrega una nueva sucursal
 @sucapi.route('/sucursales', methods=['POST'])
 def addSucursal():
     data = request.get_json()
-    sucdao = SucursalDao()
+    sucursaldao = SucursalDao()
 
-    # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['descripcion']
+    campos_requeridos = ['nombre', 'direccion', 'telefono']
 
-    # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:
         if campo not in data or data[campo] is None or len(data[campo].strip()) == 0:
             return jsonify({
-                            'success': False,
-                            'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
-                            }), 400
+                'success': False,
+                'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
+            }), 400
 
     try:
-        descripcion = data['descripcion'].upper()
-        sucursal_id = sucdao.guardarSucursal(descripcion)
-        if sucursal_id is not None:
-            return jsonify({
-                'success': True,
-                'data': {'id': sucursal_id, 'descripcion': descripcion},
-                'error': None
-            }), 201
-        else:
-            return jsonify({ 'success': False, 'error': 'No se pudo guardar la sucursal. Consulte con el administrador.' }), 500
+        id_sucursal = sucursaldao.guardarSucursal(
+            data['nombre'].strip().upper(),
+            data['direccion'].strip().upper(),
+            data['telefono']
+        )
+        
+        return jsonify({
+            'success': True,
+            'data': {
+                'id_sucursal': id_sucursal,
+                'nombre': data['nombre'].upper(),
+                'direccion': data['direccion'].upper(),
+                'telefono': data['telefono']
+            },
+            'error': None
+        }), 201
+
     except Exception as e:
         app.logger.error(f"Error al agregar sucursal: {str(e)}")
         return jsonify({
@@ -85,27 +88,35 @@ def addSucursal():
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-@sucapi.route('/sucursales/<int:sucursal_id>', methods=['PUT'])
-def updateSucursal(sucursal_id):
+@sucapi.route('/sucursales/<int:id_sucursal>', methods=['PUT'])
+def updateSucursal(id_sucursal):
     data = request.get_json()
-    sucdao = SucursalDao()
+    sucursaldao = SucursalDao()
 
-    # Validar que el JSON no esté vacío y tenga las propiedades necesarias
-    campos_requeridos = ['descripcion']
+    campos_requeridos = ['nombre', 'direccion', 'telefono']
 
-    # Verificar si faltan campos o son vacíos
     for campo in campos_requeridos:
         if campo not in data or data[campo] is None or len(data[campo].strip()) == 0:
             return jsonify({
-                            'success': False,
-                            'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
-                            }), 400
-    descripcion = data['descripcion']
+                'success': False,
+                'error': f'El campo {campo} es obligatorio y no puede estar vacío.'
+            }), 400
+
     try:
-        if sucdao.updateSucursal(sucursal_id, descripcion.upper()):
+        if sucursaldao.updateSucursal(
+            id_sucursal,
+            data['nombre'].strip().upper(),
+            data['direccion'].strip().upper(),
+            data['telefono']
+        ):
             return jsonify({
                 'success': True,
-                'data': {'id': sucursal_id, 'descripcion': descripcion},
+                'data': {
+                    'id_sucursal': id_sucursal,
+                    'nombre': data['nombre'].upper(),
+                    'direccion': data['direccion'].upper(),
+                    'telefono': data['telefono']
+                },
                 'error': None
             }), 200
         else:
@@ -120,16 +131,15 @@ def updateSucursal(sucursal_id):
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-@sucapi.route('/sucursales/<int:sucursal_id>', methods=['DELETE'])
-def deleteSucursal(sucursal_id):
-    sucdao = SucursalDao()
+@sucapi.route('/sucursales/<int:id_sucursal>', methods=['DELETE'])
+def deleteSucursal(id_sucursal):
+    sucursaldao = SucursalDao()
 
     try:
-        # Usar el retorno de eliminarSucursal para determinar el éxito
-        if sucdao.deleteSucursal(sucursal_id):
+        if sucursaldao.deleteSucursal(id_sucursal):
             return jsonify({
                 'success': True,
-                'mensaje': f'Sucursal con ID {sucursal_id} eliminada correctamente.',
+                'mensaje': f'Sucursal con ID {id_sucursal} eliminada correctamente.',
                 'error': None
             }), 200
         else:

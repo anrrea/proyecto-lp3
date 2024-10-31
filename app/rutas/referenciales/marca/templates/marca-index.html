@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-    
+
 {% block titulo %}
 Marcas
 {% endblock %}
@@ -17,6 +17,7 @@ Marcas
         <table class="table table-striped" id="tbl">
           <thead>
             <tr>
+              <th>ID</th>
               <th>Descripción</th>
               <th>Acciones</th>
             </tr>
@@ -71,7 +72,6 @@ Marcas
 
 {% block js %}
 <script>
-
   const initDatatable = () => {
     $('#tbl').DataTable({
       language: {
@@ -79,10 +79,11 @@ Marcas
       },
       ajax:'/api/v1/marcas',
       columns: [
+        { data: 'id' },
         { data: 'descripcion' },
         { data: function(row) {
             return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
-                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`
+                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`;
           }
         }
       ]
@@ -112,7 +113,7 @@ Marcas
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify({ descripcion: nuevaDescripcion})
+          }, body: JSON.stringify({ descripcion: nuevaDescripcion })
         })
         .then(resp => resp.json())
         .then(data => {
@@ -132,13 +133,13 @@ Marcas
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify({ descripcion: nuevaDescripcion})
+          }, body: JSON.stringify({ descripcion: nuevaDescripcion })
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Actualizado", "La marca ha sido agregada correctamente.", "success");
+            Swal.fire("Agregado", "La marca ha sido agregada correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
@@ -162,9 +163,7 @@ Marcas
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          //Swal.fire("Saved!", "", "success");
           $('#modalTitle').text("Editar una Marca");
-
           const idMarca = $(this).data('id');
           $('#txtIdMarca').val(idMarca);
 
@@ -205,8 +204,8 @@ Marcas
           .then(resp => resp.json())
           .then(data => {
             if(data && !data.error && data.success) {
-              // Para borrar la fila del datatable(cliente)
-              const fila =$(this).closest('tr');
+              // Para borrar la fila del datatable(marca)
+              const fila = $(this).closest('tr');
               const tabla = $('#tbl').DataTable();
               tabla.row(fila).remove().draw();
               Swal.fire("Eliminado", "", data.success);
@@ -218,7 +217,6 @@ Marcas
           });
         }
       });
-
     });
   }
 

@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
 
 {% block titulo %}
-Clientes
+Personas
 {% endblock %}
 
 {% block contenido %}
 <div class="container mt-4">
-    <h3>Listar Clientes</h3>
+    <h3>Listar Personas</h3>
 
     <!-- tarjeta -->
     <div class="card">
@@ -18,12 +18,11 @@ Clientes
           <thead>
             <tr>
               <th>ID</th>
-              <th>Nombre</th>
-              <th>Apellido</th>
+              <th>Nombres</th>
+              <th>Apellidos</th>
               <th>Nro. Cédula</th>
+              <th>Fecha Nacimiento</th>
               <th>Dirección</th>
-              <th>Teléfono</th>
-              <th>Fecha Registro</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -47,29 +46,25 @@ Clientes
           <!-- Modal body -->
           <div class="modal-body">
             <div class="form-group">
-              <input type="hidden" id="txtIdCliente">
-              <label for="txtNombre">Nombre:</label>
-              <input type="text" class="form-control" placeholder="Ingrese el nombre" id="txtNombre">
+              <input type="hidden" id="txtIdPersona">
+              <label for="txtNombre">Nombres:</label>
+              <input type="text" class="form-control" placeholder="Ingrese los nombres" id="txtNombre">
             </div>
             <div class="form-group">
-              <label for="txtApellido">Apellido:</label>
-              <input type="text" class="form-control" placeholder="Ingrese el apellido" id="txtApellido">
+              <label for="txtApellido">Apellidos:</label>
+              <input type="text" class="form-control" placeholder="Ingrese los apellidos" id="txtApellido">
             </div>
             <div class="form-group">
-              <label for="txtCedula">Nro. Cédula:</label>
-              <input type="number" class="form-control" placeholder="Ingrese el número de cédula" id="txtCedula">
+              <label for="txtNroCedula">Nro. Cédula:</label>
+              <input type="number" class="form-control" placeholder="Ingrese el número de cédula" id="txtNroCedula">
+            </div>
+            <div class="form-group">
+              <label for="txtFechaNacimiento">Fecha de Nacimiento:</label>
+              <input type="date" class="form-control" id="txtFechaNacimiento">
             </div>
             <div class="form-group">
               <label for="txtDireccion">Dirección:</label>
               <input type="text" class="form-control" placeholder="Ingrese la dirección" id="txtDireccion">
-            </div>
-            <div class="form-group">
-              <label for="txtTelefono">Teléfono:</label>
-              <input type="text" class="form-control" placeholder="Ingrese el teléfono" id="txtTelefono">
-            </div>
-            <div class="form-group">
-              <label for="txtFechaRegistro">Fecha de Registro:</label>
-              <input type="date" class="form-control" id="txtFechaRegistro">
             </div>
           </div>
 
@@ -101,18 +96,17 @@ Clientes
       language: {
         url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
       },
-      ajax: '/api/v1/clientes',  
+      ajax: '/api/v1/personas',
       columns: [
-        { data: 'id_cliente' },
-        { data: 'nombre' },
-        { data: 'apellido' },
-        { data: 'cedula' },
+        { data: 'id_persona' },
+        { data: 'nombres' },
+        { data: 'apellidos' },
+        { data: 'nro_cedula' },
+        { data: 'fecha_nacimiento' },
         { data: 'direccion' },
-        { data: 'telefono' },
-        { data: 'fecha_registro' },
         { data: function(row) {
-            return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id_cliente}">Editar</button>
-                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id_cliente}">Eliminar</button>`;
+            return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id_persona}">Editar</button>
+                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id_persona}">Eliminar</button>`;
           }
         }
       ]
@@ -121,75 +115,72 @@ Clientes
 
   const agregar = () => {
     $('#btnAgregar').on('click', function(){
-      $('#modalTitle').text("Agregar un Cliente");
-      $('#txtIdCliente').val("");
+      $('#modalTitle').text("Agregar una Persona");
+      $('#txtIdPersona').val("");
       $('#txtNombre').val("");
       $('#txtApellido').val("");
-      $('#txtCedula').val("");
+      $('#txtNroCedula').val("");
+      $('#txtFechaNacimiento').val("");
       $('#txtDireccion').val("");
-      $('#txtTelefono').val("");
-      $('#txtFechaRegistro').val("");
       $('#modalFormulario').modal();
     });
   }
 
   const guardar = () => {
     $('#btnGuardar').on('click', function() {
-      const idCliente = $('#txtIdCliente').val();
+      const idPersona = $('#txtIdPersona').val();
       const nuevoNombre = $('#txtNombre').val();
       const nuevoApellido = $('#txtApellido').val();
-      const nuevaCedula = $('#txtCedula').val();
+      const nuevoNroCedula = $('#txtNroCedula').val();
+      const nuevaFechaNacimiento = $('#txtFechaNacimiento').val();
       const nuevaDireccion = $('#txtDireccion').val();
-      const nuevoTelefono = $('#txtTelefono').val();
-      const nuevaFechaRegistro = $('#txtFechaRegistro').val();
       const tabla = $('#tbl').DataTable();
 
-      const clienteData = {
-        nombre: nuevoNombre,
-        apellido: nuevoApellido,
-        cedula: nuevaCedula,
-        direccion: nuevaDireccion,
-        telefono: nuevoTelefono,
-        fecha_registro: nuevaFechaRegistro
+      const personaData = {
+        nombres: nuevoNombre,
+        apellidos: nuevoApellido,
+        nro_cedula: nuevoNroCedula,
+        fecha_nacimiento: nuevaFechaNacimiento,
+        direccion: nuevaDireccion
       };
 
-      if(idCliente) {
-        fetch(`/api/v1/clientes/${idCliente}`, {
+      if(idPersona) {
+        fetch(`/api/v1/personas/${idPersona}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify(clienteData)
+          }, body: JSON.stringify(personaData)
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Actualizado", "El cliente ha sido actualizado correctamente.", "success");
+            Swal.fire("Actualizado", "La persona ha sido actualizada correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al actualizar el cliente.", "error");
+          Swal.fire("Error", "Ocurrió un error al actualizar la persona.", "error");
         });
       } else {
-        fetch(`/api/v1/clientes`, {
+        fetch(`/api/v1/personas`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify(clienteData)
+          }, body: JSON.stringify(personaData)
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Guardado", "El cliente ha sido agregado correctamente.", "success");
+            Swal.fire("Guardado", "La persona ha sido agregada correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al guardar el cliente.", "error");
+          Swal.fire("Error", "Ocurrió un error al guardar la persona.", "error");
         });
       }
       $('#modalFormulario').modal("hide");
@@ -205,12 +196,12 @@ Clientes
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          $('#modalTitle').text("Editar un Cliente");
+          $('#modalTitle').text("Editar una Persona");
 
-          const idCliente = $(this).data('id');
-          $('#txtIdCliente').val(idCliente);
+          const idPersona = $(this).data('id');
+          $('#txtIdPersona').val(idPersona);
 
-          fetch(`/api/v1/clientes/${idCliente}`, {
+          fetch(`/api/v1/personas/${idPersona}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json'
@@ -218,12 +209,11 @@ Clientes
           })
           .then(resp => resp.json())
           .then(data => {
-            $('#txtNombre').val(data.data.nombre);
-            $('#txtApellido').val(data.data.apellido);
-            $('#txtCedula').val(data.data.cedula);
+            $('#txtNombre').val(data.data.nombres);
+            $('#txtApellido').val(data.data.apellidos);
+            $('#txtNroCedula').val(data.data.nro_cedula);
+            $('#txtFechaNacimiento').val(data.data.fecha_nacimiento);
             $('#txtDireccion').val(data.data.direccion);
-            $('#txtTelefono').val(data.data.telefono);
-            $('#txtFechaRegistro').val(data.data.fecha_registro);
             $('#modalFormulario').modal();
           });
         }
@@ -233,7 +223,7 @@ Clientes
 
   const eliminar = () => {
     $('#tbl').on('click', 'button[name="btn_eliminar"]', function(){
-      const idCliente = $(this).data('id');
+      const idPersona = $(this).data('id');
       Swal.fire({
         title: "¿Deseas eliminar este registro?",
         showCancelButton: true,
@@ -241,7 +231,7 @@ Clientes
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          fetch(`/api/v1/clientes/${idCliente}`, {
+          fetch(`/api/v1/personas/${idPersona}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json'
@@ -253,25 +243,28 @@ Clientes
               const fila = $(this).closest('tr');
               const tabla = $('#tbl').DataTable();
               tabla.row(fila).remove().draw();
-              Swal.fire("Eliminado", "El cliente ha sido eliminado correctamente.", "success");
+              Swal.fire("Eliminado", "", data.success);
             } else {
               Swal.fire(data.error);
             }
           }).catch(err => {
-            console.error(err);
-            Swal.fire("Error", "Ocurrió un error al eliminar el cliente.", "error");
+            Swal.fire("Error", "Ocurrió un error al eliminar la persona.", "error");
           });
         }
       });
     });
   }
 
-  $(document).ready(() => {
-    initDatatable();
+  const addEvents = () => {
     agregar();
     guardar();
     editar();
     eliminar();
+  }
+
+  $(document).ready(function() {
+    initDatatable();
+    addEvents();
   });
 </script>
 {% endblock %}

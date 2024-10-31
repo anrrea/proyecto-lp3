@@ -1,60 +1,60 @@
 from flask import Blueprint, request, jsonify, current_app as app
-from app.dao.referenciales.pais.PaisDao import PaisDao
+from app.dao.referenciales.nacionalidad.NacionalidadDao import NacionalidadDao
 
-paiapi = Blueprint('paiapi', __name__)
+nacapi = Blueprint('nacapi', __name__)
 
-# Trae todos los paises
-@paiapi.route('/paises', methods=['GET'])
-def getPaises():
-    paisdao = PaisDao()
+# Trae todas las ciudadess
+@nacapi.route('/nacionalidades', methods=['GET'])
+def getNacionalidades():
+    nacdao = NacionalidadDao()
 
     try:
-        paises = paisdao.getPaises()
+        nacionalidades = nacdao.getNacionalidades()
 
         return jsonify({
             'success': True,
-            'data': paises,
+            'data': nacionalidades,
             'error': None
         }), 200
 
     except Exception as e:
-        app.logger.error(f"Error al obtener todos los paises: {str(e)}")
+        app.logger.error(f"Error al obtener todas las Nacionalidades: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
 
-@paiapi.route('/paises/<int:pais_id>', methods=['GET'])
-def getPais(pais_id):
-    paisdao = PaisDao()
+@nacapi.route('/nacionalidades/<int:nacionalidad_id>', methods=['GET'])
+def getNacionalidad(nacionalidad_id):
+    nacdao = NacionalidadDao()
 
     try:
-        pais = paisdao.getPaisById(pais_id)
+        nacionalidad = nacdao.getNacionalidadById(nacionalidad_id)
 
-        if pais:
+        if nacionalidad:
             return jsonify({
                 'success': True,
-                'data': pais,
+                'data': nacionalidad,
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró el pais con el ID proporcionado.'
+                'error': 'No se encontró la nacionalidad con el ID proporcionado.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al obtener pais: {str(e)}")
+        app.logger.error(f"Error al obtener nacionalidad: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
-        }), 500    
+        }), 500
 
-# Agrega un nuevo pais
-@paiapi.route('/paises', methods=['POST'])
-def addPais():
+# Agrega una nueva ciudad
+@nacapi.route('/nacionalidades', methods=['POST'])
+def addNacionalidad():
     data = request.get_json()
-    paisdao = PaisDao()
+    nacdao = NacionalidadDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
     campos_requeridos = ['descripcion']
@@ -69,26 +69,26 @@ def addPais():
 
     try:
         descripcion = data['descripcion'].upper()
-        pais_id = paisdao.guardarPais(descripcion)
-        if pais_id is not None:
+        nacionalidad_id = nacdao.guardarNacionalidad(descripcion)
+        if nacionalidad_id is not None:
             return jsonify({
                 'success': True,
-                'data': {'id': pais_id, 'descripcion': descripcion},
+                'data': {'id': nacionalidad_id, 'descripcion': descripcion},
                 'error': None
             }), 201
         else:
-            return jsonify({ 'success': False, 'error': 'No se pudo guardar el pais. Consulte con el administrador.' }), 500
+            return jsonify({ 'success': False, 'error': 'No se pudo guardar la nacionalidad. Consulte con el administrador.' }), 500
     except Exception as e:
-        app.logger.error(f"Error al agregar pais: {str(e)}")
+        app.logger.error(f"Error al agregar nacionalidad: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
-        }), 500    
-    
-@paiapi.route('/paises/<int:pais_id>', methods=['PUT'])
-def updatePais(pais_id):
+        }), 500
+
+@nacapi.route('/nacionalidades/<int:nacionalidad_id>', methods=['PUT'])
+def updateNacionalidad(nacionalidad_id):
     data = request.get_json()
-    paisdao = PaisDao()
+    nacdao = NacionalidadDao()
 
     # Validar que el JSON no esté vacío y tenga las propiedades necesarias
     campos_requeridos = ['descripcion']
@@ -102,45 +102,45 @@ def updatePais(pais_id):
                             }), 400
     descripcion = data['descripcion']
     try:
-        if paisdao.updatePais(pais_id, descripcion.upper()):
+        if nacdao.updateNacionalidad(nacionalidad_id, descripcion.upper()):
             return jsonify({
                 'success': True,
-                'data': {'id': pais_id, 'descripcion': descripcion},
+                'data': {'id': nacionalidad_id, 'descripcion': descripcion},
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró el pais con el ID proporcionado o no se pudo actualizar.'
+                'error': 'No se encontró la nacionalidad con el ID proporcionado o no se pudo actualizar.'
             }), 404
     except Exception as e:
-        app.logger.error(f"Error al actualizar pais: {str(e)}")
+        app.logger.error(f"Error al actualizar nacionalidad: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
         }), 500
-    
-@paiapi.route('/paises/<int:pais_id>', methods=['DELETE'])
-def deleteCiudad(pais_id):
-    paisdao = PaisDao()
+
+@nacapi.route('/nacionalidades/<int:nacionalidad_id>', methods=['DELETE'])
+def deleteNacionalidad(nacionalidad_id):
+    nacdao = NacionalidadDao()
 
     try:
-        # Usar el retorno de eliminarCiudad para determinar el éxito
-        if paisdao.deletePais(pais_id):
+        # Usar el retorno de eliminar nacionalidad para determinar el éxito
+        if nacdao.deleteNacionalidad(nacionalidad_id):
             return jsonify({
                 'success': True,
-                'mensaje': f'Pais con ID {pais_id} eliminada correctamente.',
+                'mensaje': f'Nacionalidad con ID {nacionalidad_id} eliminada correctamente.',
                 'error': None
             }), 200
         else:
             return jsonify({
                 'success': False,
-                'error': 'No se encontró el pais con el ID proporcionado o no se pudo eliminar.'
+                'error': 'No se encontró la nacionalidad con el ID proporcionado o no se pudo eliminar.'
             }), 404
 
     except Exception as e:
-        app.logger.error(f"Error al eliminar pais: {str(e)}")
+        app.logger.error(f"Error al eliminar nacionalidad: {str(e)}")
         return jsonify({
             'success': False,
             'error': 'Ocurrió un error interno. Consulte con el administrador.'
-        }), 500    
+        }), 500

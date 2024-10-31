@@ -1,12 +1,12 @@
 {% extends 'base.html' %}
     
 {% block titulo %}
-Ciudades
+Productos
 {% endblock %}
 
 {% block contenido %}
 <div class="container mt-4">
-    <h3>Listar Ciudades</h3>
+    <h3>Listar Productos</h3>
 
     <!-- tarjeta -->
     <div class="card">
@@ -18,6 +18,8 @@ Ciudades
           <thead>
             <tr>
               <th>Descripción</th>
+              <th>Cantidad</th>
+              <th>Precio Unitario</th>
               <th>Acciones</th>
             </tr>
           </thead>
@@ -42,9 +44,18 @@ Ciudades
           <!-- Modal body -->
           <div class="modal-body">
             <div class="form-group">
-              <input type="hidden" id="txtCiudadId">
+              <input type="hidden" id="txtIdProducto">
+              
               <label for="txtDescripcion">Descripción:</label>
-              <input type="text" class="form-control" placeholder="Ingrese alguna ciudad" id="txtDescripcion">
+              <input type="text" class="form-control" placeholder="Ingrese la descripción del producto" id="txtDescripcion">
+
+              <!-- Barra deslizante para cantidad -->
+              <label for="cantidadSlider">Cantidad (0-25 unidades):</label>
+              <input type="range" class="form-control-range" id="cantidadSlider" min="0" max="25" value="0" oninput="document.getElementById('cantidadDisplay').textContent = this.value">
+              <p>Unidades seleccionadas: <span id="cantidadDisplay">0</span></p>
+
+              <label for="txtPrecioUnitario">Precio Unitario:</label>
+              <input type="text" class="form-control" placeholder="Ingrese el precio unitario" id="txtPrecioUnitario">
             </div>
           </div>
 
@@ -77,12 +88,14 @@ Ciudades
       language: {
         url: "{{ url_for('static', filename='vendor/datatables/es-ES.json') }}",
       },
-      ajax:'/api/v1/ciudades',
+      ajax:'/api/v1/productos',
       columns: [
         { data: 'descripcion' },
+        { data: 'cantidad' },  
+        { data: 'precio_unitario' }, 
         { data: function(row) {
-            return `<button type="button" name="btn_editar" class="btn btn-primary" data-ciudad_id="${row.ciudad_id}">Editar</button>
-                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-ciudad_id="${row.ciudad_id}">Eliminar</button>`  // Usamos data-ciudad_id
+            return `<button type="button" name="btn_editar" class="btn btn-primary" data-id="${row.id}">Editar</button>
+                    <button type="button" name="btn_eliminar" class="btn btn-danger" data-id="${row.id}">Eliminar</button>`
           }
         }
       ]
@@ -92,69 +105,80 @@ Ciudades
   const agregar = () => {
     $('#btnAgregar').on('click', function(){
       // Setear un título a modal
-      $('#modalTitle').text("Agregar una Ciudad");
-      // inicia ventana modal
-      $('#txtCiudadId').val("");
+      $('#modalTitle').text("Agregar un Producto");
+      // Iniciar ventana modal
+      $('#txtIdProducto').val("");
       $('#txtDescripcion').val("");
+      $('#cantidadSlider').val(0);
+      $('#cantidadDisplay').text(0);
+      $('#txtPrecioUnitario').val("");
       $('#modalFormulario').modal();
     });
   }
 
   const guardar = () => {
     $('#btnGuardar').on('click', function() {
-      const ciudadId = $('#txtCiudadId').val();
+      const idProducto = $('#txtIdProducto').val();
       const nuevaDescripcion = $('#txtDescripcion').val();
+      const cantidad = $('#cantidadSlider').val();  // Obtener valor del slider
+      const precioUnitario = $('#txtPrecioUnitario').val();
       const tabla = $('#tbl').DataTable();
 
-      if(ciudadId) {
+      const productoData = {
+        descripcion: nuevaDescripcion,
+        cantidad: cantidad,
+        precio_unitario: precioUnitario
+      };
+
+      if(idProducto) {
         // update
-        fetch(`/api/v1/ciudades/${ciudadId}`, {
+        fetch(`/api/v1/productos/${idProducto}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify({ descripcion: nuevaDescripcion})
+          }, body: JSON.stringify(productoData)
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Actualizado", "La ciudad ha sido actualizada correctamente.", "success");
+            Swal.fire("Actualizado", "El producto ha sido actualizado correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al actualizar la ciudad.", "error");
+          Swal.fire("Error", "Ocurrió un error al actualizar el producto.", "error");
         });
       } else {
         // insert
-        fetch(`/api/v1/ciudades`, {
+        fetch(`/api/v1/productos`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
-          }, body: JSON.stringify({ descripcion: nuevaDescripcion})
+          }, body: JSON.stringify(productoData)
         })
         .then(resp => resp.json())
         .then(data => {
           if(data && !data.error && data.success) {
             tabla.ajax.reload();
-            Swal.fire("Agregado", "La ciudad ha sido agregada correctamente.", "success");
+            Swal.fire("Agregado", "El producto ha sido agregado correctamente.", "success");
           } else {
             Swal.fire(data.error);
           }
         }).catch(err => {
           console.error(err);
-          Swal.fire("Error", "Ocurrió un error al guardar la ciudad.", "error");
+          Swal.fire("Error", "Ocurrió un error al guardar el producto.", "error");
         });
       }
-      $('#txtDescripcion').val("");
       $('#modalFormulario').modal("hide");
     });
   }
 
+  
+
   const editar = () => {
     $('#tbl').on('click', 'button[name="btn_editar"]',function(){
-      // Mostrar mensaje de confirmación usando sweetalert
       Swal.fire({
         title: "¿Deseas editar este registro?",
         showCancelButton: true,
@@ -162,13 +186,12 @@ Ciudades
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          $('#modalTitle').text("Editar una Ciudad");
+          $('#modalTitle').text("Editar un Producto");
 
-          const ciudadId = $(this).data('ciudad_id');  // Usamos ciudad_id
-          $('#txtCiudadId').val(ciudadId);
+          const idProducto = $(this).data('id');
+          $('#txtIdProducto').val(idProducto);
 
-          // Obtener la descripción del backend
-          fetch(`/api/v1/ciudades/${ciudadId}`, {
+          fetch(`/api/v1/productos/${idProducto}`, {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json'
@@ -177,6 +200,9 @@ Ciudades
           .then(resp => resp.json())
           .then(data => {
             $('#txtDescripcion').val(data.data.descripcion);
+            $('#cantidadSlider').val(data.data.cantidad);
+            $('#cantidadDisplay').text(data.data.cantidad);
+            $('#txtPrecioUnitario').val(data.data.precio_unitario);
             $('#modalFormulario').modal();
           });
         }
@@ -185,10 +211,8 @@ Ciudades
   }
 
   const eliminar = () => {
-    $('#tbl').on('click', 'button[name="btn_eliminar"]', function() {
-      const ciudadId = $(this).data('ciudad_id');  // Usamos ciudad_id
-      const fila = $(this).closest('tr');  // Obtener fila antes del fetch
-      // Mostrar mensaje de confirmación usando sweetalert
+    $('#tbl').on('click', 'button[name="btn_eliminar"]',function(){
+      const idProducto = $(this).data('id');
       Swal.fire({
         title: "¿Deseas eliminar este registro?",
         showCancelButton: true,
@@ -196,7 +220,7 @@ Ciudades
         cancelButtonText: `No`
       }).then((result) => {
         if (result.isConfirmed) {
-          fetch(`/api/v1/ciudades/${ciudadId}`, {
+          fetch(`/api/v1/productos/${idProducto}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json'
@@ -204,16 +228,16 @@ Ciudades
           })
           .then(resp => resp.json())
           .then(data => {
-            if (data && !data.error && data.success) {
-              // Para borrar la fila del datatable (cliente)
+            if(data && !data.error && data.success) {
+              const fila = $(this).closest('tr');
               const tabla = $('#tbl').DataTable();
-              tabla.row(fila).remove().draw();  // Corregir eliminación de la fila
-              Swal.fire("Eliminado", "", "success");
+              tabla.row(fila).remove().draw();
+              Swal.fire("Eliminado", "", data.success);
             } else {
               Swal.fire(data.error);
             }
           }).catch(err => {
-            Swal.fire("Error", "Ocurrió un error al eliminar la ciudad.", "error");
+            Swal.fire("Error", "Ocurrió un error al eliminar el producto.", "error");
           });
         }
       });

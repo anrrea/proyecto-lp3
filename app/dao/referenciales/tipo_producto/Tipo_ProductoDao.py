@@ -1,24 +1,21 @@
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
 
-class MarcaDao:
+class Tipo_ProductoDao:
 
-    def getMarcas(self):
-        marcaSQL = """
+    def getTipoProductos(self):
+        tipo_productoSQL = """
         SELECT id, descripcion
-        FROM marcas
+        FROM tipo_producto
         """
-        # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(marcaSQL)
-            # trae datos de la bd
-            lista_marcas = cur.fetchall()
-            # retorno los datos
+            cur.execute(tipo_productoSQL)
+            lista_tipo_productos = cur.fetchall()
             lista_ordenada = []
-            for item in lista_marcas:
+            for item in lista_tipo_productos:
                 lista_ordenada.append({
                     "id": item[0],
                     "descripcion": item[1]
@@ -30,23 +27,20 @@ class MarcaDao:
             cur.close()
             con.close()
 
-    def getMarcaById(self, id):
-        marcaSQL = """
+    def getTipoProductoById(self, id):
+        tipo_productoSQL = """
         SELECT id, descripcion
-        FROM marcas WHERE id=%s
+        FROM tipo_producto WHERE id=%s
         """
-        # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(marcaSQL, (id,))
-            # trae datos de la bd
-            marcaEncontrada = cur.fetchone()
-            # retorno los datos
+            cur.execute(tipo_productoSQL, (id,))
+            tipo_productoEncontrado = cur.fetchone()
             return {
-                "id": marcaEncontrada[0],
-                "descripcion": marcaEncontrada[1]
+                "id": tipo_productoEncontrado[0],
+                "descripcion": tipo_productoEncontrado[1]
             }
         except con.Error as e:
             app.logger.info(e)
@@ -54,36 +48,30 @@ class MarcaDao:
             cur.close()
             con.close()
 
-    def guardarMarca(self, descripcion):
-        insertMarcaSQL = """
-        INSERT INTO marcas(descripcion) VALUES(%s)
+    def guardarTipoProducto(self, descripcion):
+        insertTipoProductoSQL = """
+        INSERT INTO tipo_producto(descripcion) VALUES(%s)
         """
 
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
 
-        # Ejecucion exitosa
         try:
-            cur.execute(insertMarcaSQL, (descripcion,))
-            # se confirma la insercion
+            cur.execute(insertTipoProductoSQL, (descripcion,))
             con.commit()
             return True
-
-        # Si algo fallo entra aqui
         except con.Error as e:
             app.logger.info(e)
-
-        # Siempre se va ejecutar
         finally:
             cur.close()
             con.close()
 
         return False
 
-    def updateMarca(self, id, descripcion):
-        updateMarcaSQL = """
-        UPDATE marcas
+    def updateTipoProducto(self, id, descripcion):
+        updateTipoProductoSQL = """
+        UPDATE tipo_producto
         SET descripcion=%s
         WHERE id=%s
         """
@@ -92,27 +80,21 @@ class MarcaDao:
         con = conexion.getConexion()
         cur = con.cursor()
 
-        # Ejecucion exitosa
         try:
-            cur.execute(updateMarcaSQL, (descripcion, id,))
-            # se confirma la insercion
+            cur.execute(updateTipoProductoSQL, (descripcion, id,))
             con.commit()
             return True
-
-        # Si algo fallo entra aqui
         except con.Error as e:
             app.logger.info(e)
-
-        # Siempre se va ejecutar
         finally:
             cur.close()
             con.close()
 
         return False
 
-    def deleteMarca(self, id):
-        deleteMarcaSQL = """
-        DELETE FROM marcas
+    def deleteTipoProducto(self, id):
+        deleteTipoProductoSQL = """
+        DELETE FROM tipo_producto
         WHERE id=%s
         """
 
@@ -120,18 +102,12 @@ class MarcaDao:
         con = conexion.getConexion()
         cur = con.cursor()
 
-        # Ejecucion exitosa
         try:
-            cur.execute(deleteMarcaSQL, (id,))
-            # se confirma la insercion
+            cur.execute(deleteTipoProductoSQL, (id,))
             con.commit()
             return True
-
-        # Si algo fallo entra aqui
         except con.Error as e:
             app.logger.info(e)
-
-        # Siempre se va ejecutar
         finally:
             cur.close()
             con.close()

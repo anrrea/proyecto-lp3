@@ -1,30 +1,30 @@
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
 
-class DepositoDao:
+class ProveedorDao:
 
-    def getDepositos(self):
-        depositoSQL = """
-        SELECT id_deposito, nombre, direccion, telefono, capacidad
-        FROM depositos
+    def getProveedores(self):
+        proveedorSQL = """
+        SELECT id_proveedor, ruc, razon_social, registro, estado
+        FROM proveedores
         """
         # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(depositoSQL)
+            cur.execute(proveedorSQL)
             # trae datos de la bd
-            lista_depositos = cur.fetchall()
+            lista_proveedores = cur.fetchall()
             # retorno los datos
             lista_ordenada = []
-            for item in lista_depositos:
+            for item in lista_proveedores:
                 lista_ordenada.append({
-                    "id_deposito": item[0],
-                    "nombre": item[1],
-                    "direccion": item[2],
-                    "telefono": item[3],
-                    "capacidad": item[4],
+                    "id_proveedor": item[0],
+                    "ruc": item[1],
+                    "razon_social": item[2],
+                    "registro": item[3],
+                    "estado": item[4]  
                 })
             return lista_ordenada
         except con.Error as e:
@@ -33,27 +33,27 @@ class DepositoDao:
             cur.close()
             con.close()
 
-    def getDepositoById(self, id_deposito):
-        depositoSQL = """
-        SELECT id_deposito,  nombre, direccion, telefono, capacidad
-        FROM depositos WHERE id_deposito=%s
+    def getProveedorById(self, id_proveedor):
+        proveedorSQL = """
+        SELECT id_proveedor, ruc, razon_social, registro, estado
+        FROM proveedores WHERE id_proveedor=%s
         """
         # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(depositoSQL, (id_deposito,))
+            cur.execute(proveedorSQL, (id_proveedor,))
             # trae datos de la bd
-            depositoEncontrado = cur.fetchone()
+            proveedorEncontrado = cur.fetchone()
             # retorno los datos
-            if depositoEncontrado:
+            if proveedorEncontrado:
                 return {
-                    "id_deposito": depositoEncontrado[0],
-                    "nombre": depositoEncontrado[1],
-                    "direccion": depositoEncontrado[2],
-                    "telefono": depositoEncontrado[3],
-                    "capacidad": depositoEncontrado[4],
+                    "id_proveedor": proveedorEncontrado[0],
+                    "ruc": proveedorEncontrado[1],
+                    "razon_social": proveedorEncontrado[2],
+                    "registro": proveedorEncontrado[3],
+                    "estado": proveedorEncontrado[4]  
                 }
             return None
         except con.Error as e:
@@ -62,9 +62,9 @@ class DepositoDao:
             cur.close()
             con.close()
 
-    def guardarDeposito(self, nombre, direccion, telefono, capacidad):
-        insertDepositoSQL = """
-        INSERT INTO depositos(nombre, direccion, telefono, capacidad)
+    def guardarProveedor(self, ruc, razon_social, registro, estado):
+        insertProveedorSQL = """
+        INSERT INTO proveedores(ruc, razon_social, registro, estado)
         VALUES (%s, %s, %s, %s)
         """
 
@@ -74,7 +74,7 @@ class DepositoDao:
 
         # Ejecucion exitosa
         try:
-            cur.execute(insertDepositoSQL, (nombre, direccion, telefono, capacidad))
+            cur.execute(insertProveedorSQL, (ruc, razon_social, registro, estado))
             # se confirma la insercion
             con.commit()
             return True
@@ -86,11 +86,11 @@ class DepositoDao:
 
         return False
 
-    def updateDeposito(self, id_deposito, nombre, direccion, telefono, capacidad):
-        updateDepositoSQL = """
-        UPDATE depositos
-        SET nombre=%s, direccion=%s, telefono=%s, capacidad=%s
-        WHERE id_deposito=%s
+    def updateProveedor(self, id_proveedor, ruc, razon_social, registro, estado):
+        updateProveedorSQL = """
+        UPDATE proveedores
+        SET ruc=%s, razon_social=%s, registro=%s, estado=%s
+        WHERE id_proveedor=%s
         """
 
         conexion = Conexion()
@@ -99,7 +99,7 @@ class DepositoDao:
 
         # Ejecucion exitosa
         try:
-            cur.execute(updateDepositoSQL, (nombre, direccion, telefono, capacidad, id_deposito))
+            cur.execute(updateProveedorSQL, (ruc, razon_social, registro, estado, id_proveedor))
             # se confirma la insercion
             con.commit()
             return True
@@ -111,10 +111,10 @@ class DepositoDao:
 
         return False
 
-    def deleteDeposito(self, id_deposito):
-        deleteDepositoSQL = """
-        DELETE FROM depositos
-        WHERE id_deposito=%s
+    def deleteProveedor(self, id_proveedor):
+        deleteProveedorSQL = """
+        DELETE FROM proveedores
+        WHERE id_proveedor=%s
         """
 
         conexion = Conexion()
@@ -123,8 +123,8 @@ class DepositoDao:
 
         # Ejecucion exitosa
         try:
-            cur.execute(deleteDepositoSQL, (id_deposito,))
-            # se confirma la insercion
+            cur.execute(deleteProveedorSQL, (id_proveedor,))
+            # se confirma la eliminación
             con.commit()
             return True
         except con.Error as e:

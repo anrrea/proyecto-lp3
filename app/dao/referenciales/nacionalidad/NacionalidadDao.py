@@ -1,13 +1,13 @@
 from flask import current_app as app
 from app.conexion.Conexion import Conexion
 
-class PaisDao:
+class NacionalidadDao:
 
-    def getPaises(self):
+    def getNacionalidades(self):
 
-        paisSQL = """
+        nacionalidadSQL = """
         SELECT id, descripcion 
-        FROM paises
+        FROM nacionalidades
         """
 
         # objeto conexion
@@ -15,44 +15,43 @@ class PaisDao:
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(paisSQL)
-            lista_paises = cur.fetchall()
-            return [ { "id": item[0], "descripcion": item[1] } for item in lista_paises]
+            cur.execute(nacionalidadSQL)
+            lista_nacionalidades = cur.fetchall()
+            return [ { "id": item[0], "descripcion": item[1] } for item in lista_nacionalidades]
         except con.Error as e:
              app.logger.info(e)
         finally:
             cur.close()
             con.close()
 
-    def getPaisById(self, id):
+    def getNacionalidadById(self, id):
 
-        paisSQL = """
+        nacionalidadSQL = """
         SELECT id, descripcion
-        FROM paises WHERE id=%s
+        FROM nacionalidades WHERE id=%s
         """
         # objeto conexion
         conexion = Conexion()
         con = conexion.getConexion()
         cur = con.cursor()
         try:
-            cur.execute(paisSQL, (id,))
+            cur.execute(nacionalidadSQL, (id,))
             # trae datos de la bd
-            paisEncontrado = cur.fetchone()
+            nacionalidadEncontrada = cur.fetchone()
             # retorno los datos
             return {
-                    "id": paisEncontrado[0],
-                    "descripcion": paisEncontrado[1]
+                    "id": nacionalidadEncontrada[0],
+                    "descripcion": nacionalidadEncontrada[1]
                 }
         except con.Error as e:
             app.logger.info(e)
         finally:
             cur.close()
             con.close()
-
-
-    def guardarPais(self, descripcion):   
-        insertPaisSQL = """
-        INSERT INTO paises(descripcion) VALUES(%s)
+        
+    def guardarNacionalidad(self, descripcion):   
+        nacionalidadSQL = """
+        INSERT INTO nacionalidades(descripcion) VALUES(%s)
         """
 
         conexion = Conexion()
@@ -60,7 +59,7 @@ class PaisDao:
         cur = con.cursor()        
 
         try:
-            cur.execute(insertPaisSQL, (descripcion,))
+            cur.execute(nacionalidadSQL, (descripcion,))
 
             con.commit()   
             return True
@@ -71,12 +70,12 @@ class PaisDao:
         finally:
             cur.close()
             con.close()
-            return False        
+            return False
         
-    def updatePais(self, id, descripcion):
+    def updateNacionalidad(self, id, descripcion):
 
-            updatePaisSQL = """
-            UPDATE paises
+            updateNacionalidadSQL = """
+            UPDATE nacionalidades
             SET descripcion=%s
             WHERE id=%s
             """
@@ -87,7 +86,7 @@ class PaisDao:
 
             # Ejecucion exitosa
             try:
-                cur.execute(updatePaisSQL, (descripcion, id,))
+                cur.execute(updateNacionalidadSQL, (descripcion, id,))
                 # se confirma la insercion
                 con.commit()
 
@@ -102,12 +101,13 @@ class PaisDao:
                 cur.close()
                 con.close()
 
-            return False       
-    
-    def deletePais(self, id):
+            return False        
 
-            updatePaisSQL = """
-            DELETE FROM paises
+
+    def deleteNacionalidad(self, id):
+
+            updateNacionalidadSQL = """
+            DELETE FROM nacionalidades
             WHERE id=%s
             """
 
@@ -117,7 +117,7 @@ class PaisDao:
 
             # Ejecucion exitosa
             try:
-                cur.execute(updatePaisSQL, (id,))
+                cur.execute(updateNacionalidadSQL, (id,))
                 # se confirma la insercion
                 con.commit()
 
